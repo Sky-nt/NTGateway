@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,9 +36,18 @@ namespace Gateway
                         //第二种：
                         builder.AddOcelot(context.HostingEnvironment);
                     });
+                    webBuilder.ConfigureServices(service =>
+                    {
+                        //添加Ocelot服务，因为只需要这一个，
+                        //所以不需要再整个Startup类了
+                        service.AddOcelot();
+                    });
+                    webBuilder.Configure(app =>
+                    {
+                        //注册请求中间件
+                        app.UseOcelot();
+                    });
                     webBuilder.UseUrls("http://*:5000");
-
-                    webBuilder.UseStartup<Startup>();
                 });
     }
 }
